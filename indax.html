@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ร้านขายโทรศัพท์ออนไลน์</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <header class="bg-blue-600 text-white p-4 text-center text-2xl font-bold shadow-md">
+    📱 PhoneShop Online (Supabase)
+  </header>
+
+  <div class="max-w-4xl mx-auto p-4 grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <!-- สินค้า -->
+    <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+      <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" alt="Smartphone" class="w-48 h-60 object-cover mb-4 rounded-md">
+      <h2 class="text-xl font-bold mb-2">SmartPhone Pro Max 2026</h2>
+      <p class="text-gray-600 mb-4 text-center">สเปกแรง จอชัด กล้องระดับโปร แบตอึดตลอดวัน</p>
+      <div class="text-2xl font-bold text-blue-600 mb-4">฿ 25,900</div>
+    </div>
+
+    <!-- ฟอร์มสั่งซื้อ -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h3 class="text-xl font-bold mb-4 border-b pb-2">ข้อมูลการสั่งซื้อ</h3>
+      <form id="orderForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">ชื่อ - นามสกุล</label>
+          <input type="text" id="fullname" required class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">เบอร์โทรศัพท์</label>
+          <input type="tel" id="phone" required class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">ที่อยู่จัดส่ง</label>
+          <textarea id="address" rows="3" required class="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+        </div>
+        <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white py-3 rounded-md font-bold hover:bg-blue-700 transition">
+          ยืนยันการสั่งซื้อ
+        </button>
+      </form>
+      <div id="statusMessage" class="mt-4 text-center font-bold text-green-600 hidden">
+        ✅ บันทึกคำสั่งซื้อเรียบร้อยแล้ว!
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. แก้ไข URL ตัด /rest/v1/ ออกให้เหลือแค่ .co
+    const SUPABASE_URL = 'https://dcrqpxiuvmleqatbedsi.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_wUsxOvELolR4IQUPcz7kwQ_leoRB7qK'; 
+
+    // 2. เปลี่ยนชื่อตัวแปรเป็น supabaseClient ไม่ให้ซ้ำกับชื่อไลบรารี
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "กำลังบันทึกข้อมูล...";
+
+      const customerName = document.getElementById('fullname').value;
+      const phone = document.getElementById('phone').value;
+      const address = document.getElementById('address').value;
+
+      // ส่งข้อมูลเข้าตาราง orders
+      const { data, error } = await supabaseClient
+        .from('orders')
+        .insert([
+          { 
+            customer_name: customerName, 
+            phone: phone, 
+            address: address, 
+            product: 'SmartPhone Pro Max 2026' 
+          }
+        ]);
+
+      if (error) {
+        alert('เกิดข้อผิดพลาด: ' + error.message);
+      } else {
+        document.getElementById('statusMessage').classList.remove('hidden');
+        document.getElementById('orderForm').reset();
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.innerText = "ยืนยันการสั่งซื้อ";
+    });
+  </script>
+</body>
+</html>
